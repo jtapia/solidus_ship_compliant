@@ -2,28 +2,21 @@ require_dependency 'spree/calculator'
 
 module Spree
   class Calculator::ShipCompliantCalculator < Calculator
-    include Spree::Tax::TaxHelpers
-
     CACHE_EXPIRATION_DURATION = 10.minutes
 
     def self.description
       Spree.t(:ship_compliant_tax)
     end
 
-    # Default tax calculator still needs to support orders for legacy reasons
-    # Orders created before Spree 2.1 had tax adjustments applied to the order, as a whole.
-    # Orders created with Spree 2.2 and after, have them applied to the line items individually.
     def compute_order(order)
       raise 'Spree::ShipCompliant is designed to calculate taxes at the shipment and line-item levels.'
     end
 
-    # When it comes to computing shipments or line items: same same.
     def compute_shipment_or_line_item(item)
       if rate.included_in_price
         raise 'ShipCompliant cannot calculate inclusive sales taxes.'
       else
         round_to_two_places(tax_for_item(item))
-        # TODO: take discounted_amount into account. This is a problem because ShipCompliant API does not take discounts nor does it return percentage rates.
       end
     end
 
@@ -34,12 +27,6 @@ module Spree
       if rate.included_in_price
         raise 'ShipCompliant cannot calculate inclusive sales taxes.'
       else
-        # Sales tax will be applied to the Shipment itself, rather than to the Shipping Rates.
-        # Note that this method is called from ShippingRate.display_price, so if we returned
-        # the shipping sales tax here, it would display as part of the display_price of the
-        # ShippingRate, which is not consistent with how US sales tax typically works -- i.e.,
-        # it is an additional amount applied to a sale at the end, rather than being part of
-        # the displayed cost of a good or service.
         0
       end
     end
@@ -53,24 +40,11 @@ module Spree
       rails_cache_key = cache_key(order, shipment, tax_address)
 
       Rails.cache.fetch(rails_cache_key, expires_in: CACHE_EXPIRATION_DURATION) do
-        Spree::Taxjar.new(order, nil, shipment).calculate_tax_for_shipment
+        Spree::ShipCompliant.new(order, nil, shipment).calculate_tax_for_shipment
       end
     end
 
     def tax_for_item(item)
-      # order = item.order
-      # return 0 unless tax_address = order.tax_address
-
-      # rails_cache_key = cache_key(order, item, tax_address)
-
-      # ## Test when caching enabled that only 1 API call is sent for an order
-      # ## should avoid N calls for N line_items
-      # Rails.cache.fetch(rails_cache_key, expires_in: CACHE_EXPIRATION_DURATION) do
-      #   taxjar_response = Spree::Taxjar.new(order).calculate_tax_for_order
-      #   return 0 unless taxjar_response
-      #   tax_for_current_item = cache_response(taxjar_response, order, tax_address, item)
-      #   tax_for_current_item
-      # end
       order = item.order
       item_address = order.ship_address || order.billing_address
       # Only calculate tax when we have an address and it's in our jurisdiction
@@ -114,29 +88,8 @@ module Spree
       calculable
     end
 
-    # def tax_for_item(item)
-    #   order = item.order
-    #   return 0 unless tax_address = order.tax_address
-
-    #   rails_cache_key = cache_key(order, item, tax_address)
-
-    #   SpreeTaxjar::Logger.log(__method__, {line_item: {order: {id: item.order.id, number: item.order.number}}, cache_key: rails_cache_key}) if SpreeTaxjar::Logger.logger_enabled?
-
-    #   ## Test when caching enabled that only 1 API call is sent for an order
-    #   ## should avoid N calls for N line_items
-    #   Rails.cache.fetch(rails_cache_key, expires_in: CACHE_EXPIRATION_DURATION) do
-    #     taxjar_response = Spree::Taxjar.new(order).calculate_tax_for_order
-    #     return 0 unless taxjar_response
-    #     tax_for_current_item = cache_response(taxjar_response, order, tax_address, item)
-    #     tax_for_current_item
-    #   end
-    # end
-
     def cache_response(response, order, address, item = nil)
-      # SpreeTaxjar::Logger.log(__method__, {order: {id: order.id, number: order.number}, taxjar_api_advanced_res: taxjar_response}) if SpreeTaxjar::Logger.logger_enabled?
-      # SpreeTaxjar::Logger.log(__method__, {order: {id: order.id, number: order.number}, taxjar_api_advanced_res: taxjar_response.breakdown.line_items}) if SpreeTaxjar::Logger.logger_enabled?
-      ## res is set to faciliate testing as to return computed result from API
-      ## for given line_item
+      ## response is set to faciliate testing as to return computed result from API
       ## better to use Rails.cache.fetch for order and wrapping lookup based on line_item id
       res = nil
       response.breakdown.line_items.each do |line_item|
