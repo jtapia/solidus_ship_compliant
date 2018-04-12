@@ -15,7 +15,5 @@ gem 'ship_compliant', github: 'ShipCompliant/ship_compliant-ruby'
 gem 'pg', '~> 0.21'
 gem 'sqlite3'
 gem 'mysql2', '~> 0.4.10'
-gem 'pry'
-gem 'pry-rails'
 
 gemspec
