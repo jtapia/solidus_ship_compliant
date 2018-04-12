@@ -1,0 +1,9 @@
+<% content_for :tabs do %>
+  <nav>
+    <ul class="tabs" data-hook="admin_settings_ship_complaint_tabs">
+      <% if can? :display, Spree::ShipCompliant %>
+        <%= settings_tab_item plural_resource_name(Spree::ShipCompliant), spree.edit_admin_ship_compliant_settings_path %>
+      <% end %>
+    </ul>
+  </nav>
+<% end %>

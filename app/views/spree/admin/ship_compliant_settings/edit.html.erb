@@ -1,0 +1,30 @@
+<%= render partial: 'spree/admin/shared/configuration_menu' %>
+
+<% content_for :page_title do %>
+  <%= Spree.t(:ship_compliant_settings) %>
+<% end %>
+
+<%= form_tag admin_ship_compliant_settings_path, method: :put do %>
+  <div id="preferences" data-hook>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset class="no-border-bottom">
+          <% @preferences_ship_compliant.each do |name| %>
+            <div class="form-group">
+              <%= render "spree/admin/shared/preference_fields/#{@config.preference_type(name)}",
+                  name:  name.to_s,
+                  value: @config[name],
+                  label: t(name.to_s, scope: 'spree', default: name.to_s.humanize) %>
+            </div>
+          <% end %>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="form-buttons" data-hook="buttons">
+      <%= button Spree.t('actions.update'), 'refresh' %>
+      <span class="or"><%= Spree.t(:or) %></span>
+      <%= button_link_to Spree.t('actions.cancel'), admin_orders_url, icon: 'delete' %>
+    </div>
+  </div>
+<% end %>

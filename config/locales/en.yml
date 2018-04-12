@@ -1,0 +1,14 @@
+en:
+  activerecord:
+    attributes:
+      spree/ship_compliant:
+        username: Username
+        password: Password
+        partner_key: Partner Key
+        service_url: Service URL
+  spree:
+    admin:
+      tab:
+        ship_compliant: Ship Compliant Settings
+    ship_compliant_tax: Ship Compliant Tax
+    ship_compliant_settings_updated: The shipment compliant settings have been successfully updated!

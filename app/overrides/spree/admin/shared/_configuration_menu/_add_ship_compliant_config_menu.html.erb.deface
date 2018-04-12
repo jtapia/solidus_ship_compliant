@@ -1,0 +1,3 @@
+<!-- insert_bottom "[data-hook=admin_configurations_sidebar_menu]" -->
+
+<%= configurations_sidebar_menu_item Spree.t('admin.tab.ship_compliant'), edit_admin_ship_compliant_settings_path %>
