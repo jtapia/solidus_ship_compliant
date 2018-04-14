@@ -5,10 +5,19 @@ en:
         username: Username
         password: Password
         partner_key: Partner Key
-        service_url: Service URL
   spree:
     admin:
       tab:
         ship_compliant: Ship Compliant Settings
+        vendors: Vendors
     ship_compliant_tax: Ship Compliant Tax
     ship_compliant_settings_updated: The shipment compliant settings have been successfully updated!
+    ship_compliant_settings: Ship Compliant Settings
+    taxonomy_brands_name: Brand
+    taxonomy_categories_name: Categories
+    taxonomy_types_name: Type
+    ship_compliant_alert: ShipCompliant cannot calculate inclusive sales taxes
+    store_locator: Store Location
+    store_locators: Store Locations
+    locator_address: Locator Address
+    available_shipping_locators: Available Shipping Locators

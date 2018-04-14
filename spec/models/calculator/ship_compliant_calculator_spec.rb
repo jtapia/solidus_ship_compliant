@@ -10,7 +10,7 @@ describe Spree::Calculator::ShipCompliantCalculator do
   end
 
   describe '#compute_order' do
-    it 'should raise DoNotUseCompute' do
+    it 'should raise an error' do
       expect {
         calculator.compute_order(nil)
       }.to raise_error(RuntimeError)

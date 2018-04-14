@@ -1,15 +1,13 @@
 module Spree
   class ShipCompliant
     extend ActiveModel::Naming
-    attr_reader :order, :reimbursement, :shipment
+    attr_reader :order, :reimbursement, :shipment, :rates
 
     SHIPPING_SERVICE = 'UPS'
 
-    def initialize(order = nil, reimbursement = nil, shipment = nil)
+    def initialize(order = nil)
       @order = order
-      @shipment = shipment
-      @reimbursement = reimbursement
-      @client = client
+      @rates = []
     end
 
     def transaction_from_order
@@ -39,17 +37,7 @@ module Spree
                         packages: nil,
                         ship_date: DateTime.now,
                         shipping_service: SHIPPING_SERVICE,
-                        shipment_items: order.line_items.map do |item|
-                                          {
-                                            shipment_item: {
-                                              discounts: nil,
-                                              brand_key: item.variant.sku.split('-').first,
-                                              product_key: item.variant.sku.split('-').last,
-                                              product_quantity: item.quantity,
-                                              product_unit_price: item.price.to_i
-                                            }
-                                          }
-                                        end,
+                        shipment_items: shipment_items,
                         ship_to: address_from_spree_address(order.ship_address)
                       }
                     }
@@ -57,15 +45,11 @@ module Spree
                 }
 
       begin
+        initialize_client
         transaction = ::ShipCompliant::CheckCompliance.of_sales_order(payload)
-      rescue SolidusShipCompliant::Error
+      rescue ::ShipCompliant::CheckComplianceResult
       end
 
-      index = -1 # array is zero-indexed
-      # Prepare line_items for lookup
-      order.line_items.each { |line_item| transaction.cart_items << cart_item_from_item(line_item, index += 1) }
-      # Prepare shipments for lookup
-      # order.shipments.each { |shipment| transaction.cart_items << cart_item_from_item(shipment, index += 1) }
       transaction
     end
 
@@ -83,48 +67,25 @@ module Spree
         zip1:       address.zipcode.try(:[], 0...5)).address
     end
 
-    def cart_item_from_item(item, index)
-      case item
-      when Spree::LineItem
-        ::ShipCompliant::CartItem.new(
-          index:    index,
-          item_id:  item.try(:variant).try(:sku).present? ? item.try(:variant).try(:sku) : "LineItem #{item.id}",
-          tic:      (item.product.tax_cloud_tic || Spree::Config.taxcloud_default_product_tic),
-          price:    item.price,
-          quantity: item.quantity
-        )
-      when Spree::Shipment
-        ::ShipCompliant::CartItem.new(
-          index:    index,
-          item_id:  "Shipment #{item.number}",
-          tic:      Spree::Config.taxcloud_shipping_tic,
-          price:    item.cost,
-          quantity: 1
-        )
-      else
-        raise Spree.t(:cart_item_cannot_be_made)
-      end
-    end
-
     def shipment_items
       items = []
 
-      order.line_items.each do |item|
+      order.line_items.map do |item|
         items << {
                   shipment_item: {
                     discounts: nil,
-                    brand_key: item.variant.sku.split('-').first,
-                    product_key: item.variant.sku.split('-').last,
+                    brand_key: item.variant.brand_key,
+                    product_key: item.variant.product_key,
                     product_quantity: item.quantity,
                     product_unit_price: item.price.to_i
                   }
                 }
       end
 
-      items.to_json
+      items
     end
 
-    def client
+    def initialize_client
       ::ShipCompliant.configure do |c|
         c.partner_key = SolidusShipCompliant::Config.partner_key
         c.username    = SolidusShipCompliant::Config.username
