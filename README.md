@@ -8,10 +8,9 @@ Add Solidus ability to calculate rate taxes based on Ship Compliant third party
 Requirements
 ------------
 
-- Define taxonomies and taxons related # [ Brand, Categories ]
-- Define the necessary `option_types` # [ bottle_size ]
-- Define the necessary `product_properties` # [ default_case, default_wholesale_case_price, percent_alcohol, varietal, vintage, volume_amount, volume_unit ]
-- Create relation between `products` - `taxons`, `product_properties` and `option_types`
+- Define taxonomies and taxons related # [ Brands, Categories ]
+- Define the necessary `product_properties` # [ bottle_size, default_case, default_wholesale_case_price, percent_alcohol, varietal, vintage, volume_amount, volume_unit ]
+- Create relation between `products` - `taxons` and `product_properties`
 
 Installation
 ------------

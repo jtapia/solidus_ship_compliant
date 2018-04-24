@@ -42,7 +42,7 @@ module Spree
       order = item.order
       item_address = order.tax_address || order.shipping_address
 
-      return 0 unless item_address.present? && calculable.zone.include?(item_address)
+      return 0 unless item_address.present? && rate.zone.include?(item_address)
 
       rails_cache_key = cache_key(order, item, item_address)
 
@@ -62,10 +62,10 @@ module Spree
     end
 
     def cache_response(response, order, address, line_item = nil)
+      return 0 unless response && response.errors.blank?
+
       res = nil
       cart_items = response.shipment_sales_tax_rates[0][:product_sales_tax_rates][:product_sales_tax_rate]
-
-      return 0 unless response || cart_items
 
       cart_items.each do |item|
         next unless item[:@product_key] == line_item.variant.product_key

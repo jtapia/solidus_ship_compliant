@@ -1,5 +1,7 @@
 Spree::Taxon.class_eval do
   def brand_key
+    return '' unless name
+
     words = name.split(' ')
 
     if words.count > 1

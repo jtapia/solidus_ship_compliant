@@ -1,7 +1,7 @@
 module Spree
   class ShipCompliant
     extend ActiveModel::Naming
-    attr_reader :order, :reimbursement, :shipment, :rates
+    attr_reader :order, :rates
 
     SHIPPING_SERVICE = 'UPS'
 
@@ -48,6 +48,7 @@ module Spree
         initialize_client
         transaction = ::ShipCompliant::CheckCompliance.of_sales_order(payload)
       rescue ::ShipCompliant::CheckComplianceResult
+        return 0
       end
 
       transaction

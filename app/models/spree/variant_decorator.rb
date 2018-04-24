@@ -4,8 +4,8 @@ Spree::Variant.class_eval do
            :volume_unit, to: :product
 
   def brand_key
-    brand = product.taxons.joins(:taxonomy).find_by(spree_taxonomies: { name: 'Brand' })
-    brand.try(:brand_key)
+    brand = product.taxons.joins(:taxonomy).find_by(spree_taxonomies: { name: 'Brands' })
+    brand.brand_key rescue ''
   end
 
   def product_key
@@ -26,11 +26,11 @@ Spree::Variant.class_eval do
   ##
 
   def bottle_size
-    product.option_types.find_by(presentation: 'Bottle Size').try(:presentation)
+    product.property('bottle_size')
   end
 
   def default_case
-    product.property('default_case') || 1
+    product.property('default_case')
   end
 
   def default_wholesale_case_price

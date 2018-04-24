@@ -3,8 +3,7 @@ require 'spec_helper'
 describe Spree::Variant, type: :model do
   let!(:taxonomy) { create(:taxonomy, name: 'Brand') }
   let!(:brand_taxon) { create(:taxon, taxonomy: taxonomy) }
-  let!(:bottle_size_option_type) { create(:option_type, name: 'Bottle Size', presentation: 'Bottle Size') }
-  let!(:bottle_size_option_value) { create(:option_value, option_type: bottle_size_option_type) }
+  let!(:bottle_size) { create(:property, name: 'bottle_size') }
   let!(:default_case) { create(:property, name: 'default_case') }
   let!(:default_wholesale_case_price) { create(:property, name: 'default_wholesale_case_price') }
   let!(:percent_alcohol) { create(:property, name: 'percent_alcohol') }
@@ -15,7 +14,7 @@ describe Spree::Variant, type: :model do
 
   let!(:product) { create(:product, taxons: [brand_taxon]) }
 
-  let!(:bottle_size_product_property) { create(:product_option_type, product: product, option_type: bottle_size_option_type) }
+  let!(:bottle_size_product_property) { create(:product_property, product: product, property: bottle_size, value: '750ml') }
   let!(:default_case_product_property) { create(:product_property, product: product, property: default_case, value: '1') }
   let!(:default_wholesale_case_price_product_property) { create(:product_property, product: product, property: default_wholesale_case_price, value: '670') }
   let!(:percent_alcohol_product_property) { create(:product_property, product: product, property: percent_alcohol, value: '5%') }
